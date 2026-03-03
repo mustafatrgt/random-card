@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Global Architecture | Glass Liquid</title>
+<!-- Tailwind CSS CDN with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Space Grotesk', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            glass: 'rgba(255, 255, 255, 0.05)',
+            'glass-border': 'rgba(255, 255, 255, 0.1)',
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-20px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="glass-liquid-effects">
+    body {
+      background: #020617;
+      overflow-x: hidden;
+      color: white;
+    }
+    
+    .liquid-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.3;
+      animation: drift 20s linear infinite alternate;
+    }
+
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to { transform: translate(100px, 50px) scale(1.1); }
+    }
+
+    .glass-card {
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.05);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(139, 92, 246, 0.2), inset 0 0 15px rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      inset: -50%;
+      background: conic-gradient(from 0deg, transparent, transparent, #8B5CF6, transparent, transparent);
+      animation: rotate 4s linear infinite;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .glass-card:hover::before {
+      opacity: 1;
+    }
+
+    .glass-card::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      background: #080c1d;
+      border-radius: inherit;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .glass-card > * {
+      position: relative;
+      z-index: 10;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    #cursor-glow {
+      position: fixed;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 5;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s, height 0.3s;
+    }
+
+    .modal-backdrop {
+      backdrop-filter: blur(10px);
+      background: rgba(0, 0, 0, 0.85);
+    }
+  </style>
+</head>
+<body class="font-sans antialiased"><div id="cursor-glow"></div>
+<!-- BEGIN: Loading Screen -->
+<div class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950 transition-opacity duration-700" id="loading-screen">
+<div class="flex flex-col items-center gap-5">
+<div class="relative h-20 w-20">
+<div class="absolute inset-0 rounded-full border border-blue-500/20"></div>
+<div class="absolute inset-0 rounded-full border-2 border-transparent border-t-blue-400 border-r-violet-400 animate-spin"></div>
+<div class="absolute inset-3 rounded-full bg-blue-500/10 animate-pulse"></div>
+</div>
+<div class="w-56 max-w-[75vw] h-1.5 rounded-full bg-white/10 overflow-hidden">
+<div class="h-full w-0 bg-gradient-to-r from-blue-500 to-violet-500 transition-[width] duration-200 ease-linear" id="loading-bar"></div>
+</div>
+<div class="text-xs tracking-[0.3em] text-blue-300" id="loading-percent">LOADING 0%</div>
+</div>
+</div>
+<!-- END: Loading Screen -->
+<!-- BEGIN: Liquid Background -->
+<div class="liquid-bg" data-purpose="background-animations">
+<div class="orb w-[600px] h-[600px] bg-purple-900 top-[-20%] left-[-10%]" style="animation-duration: 25s;"></div>
+<div class="orb w-[700px] h-[700px] bg-blue-900 bottom-[-30%] right-[-10%]" style="animation-duration: 30s; animation-delay: -5s;"></div>
+<div class="orb w-[400px] h-[400px] bg-indigo-900 top-[30%] right-[10%]" style="animation-duration: 22s; animation-delay: -2s;"></div>
+<div class="orb w-[500px] h-[500px] bg-slate-900 bottom-[10%] left-[20%]" style="animation-duration: 35s;"></div>
+</div>
+<!-- END: Liquid Background -->
+<!-- BEGIN: Navigation -->
+<nav class="fixed top-0 w-full z-50 p-6 flex items-center" data-purpose="main-nav">
+<div class="text-2xl font-extrabold tracking-tighter text-white">GL<span class="text-blue-500">I</span>QU</div>
+</nav>
+<!-- END: Navigation -->
+<main class="relative z-10">
+<!-- BEGIN: Hero Section -->
+<!-- END: Hero Section -->
+<!-- BEGIN: Dynamic Cards Section -->
+<section class="py-24 px-6 md:px-12 max-w-7xl mx-auto pt-40" data-purpose="dynamic-card-container" id="explore">
+<div class="mb-16 text-center">
+<h2 class="text-3xl font-bold mb-4">Regional Landmarks</h2>
+<div class="w-20 h-1 bg-blue-600 mx-auto rounded-full"></div>
+</div>
+<!-- Container for randomized cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="dynamic-grid">
+<!-- Cards will be injected via JS -->
+</div>
+<div class="mt-16 text-center">
+<button class="text-blue-400 border border-blue-400/30 px-6 py-2 rounded-lg hover:bg-blue-400/10 transition-colors" onclick="renderRandomCards()">
+          Refresh Selection
+        </button>
+</div>
+</section>
+<!-- END: Dynamic Cards Section -->
+<!-- BEGIN: Gallery Section -->
+<!-- END: Gallery Section -->
+<!-- BEGIN: Footer -->
+<footer class="py-12 px-6 border-t border-white/5 text-center text-gray-500 text-sm">
+<p>Created by Mustafa Turgut</p>
+</footer>
+<!-- END: Footer -->
+</main>
+<!-- BEGIN: Modals -->
+<!-- Architecture Detail Modal -->
+<div class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4" id="arch-modal">
+<div class="modal-backdrop absolute inset-0" onclick="closeArchModal()"></div>
+<div class="glass-card relative z-10 max-w-2xl w-full p-8 md:p-12 rounded-3xl animate-[fadeInUp_0.4s_ease-out]">
+<button class="absolute top-6 right-6 text-white/50 hover:text-white" onclick="closeArchModal()">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<div id="arch-content">
+<!-- Content injected by JS -->
+</div>
+</div>
+</div>
+<!-- Gallery Lightbox Modal -->
+<div class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4" id="gallery-modal">
+<div class="modal-backdrop absolute inset-0" onclick="closeGalleryModal()"></div>
+<div class="relative z-10 max-w-5xl w-full flex items-center justify-center">
+<img alt="Full view" class="max-h-[85vh] rounded-lg shadow-2xl transition-all duration-300 transform scale-95 opacity-0" id="gallery-large-img" src=""/>
+<button class="absolute -top-12 right-0 text-white hover:text-blue-400" onclick="closeGalleryModal()">
+        Close
+      </button>
+</div>
+</div>
+<!-- END: Modals -->
+<script data-purpose="country-data">
+    const countries = [
+      { name: "Japan", flag: "./assets/flags/jp.svg", image: "./assets/images/japan.jpg", desc: "Japanese modern architecture is renowned for its seamless blend of minimalist glass structures and traditional wooden heritage. The liquid design philosophy here focuses on light manipulation and spatial flow in dense urban environments." },
+      { name: "Norway", flag: "./assets/flags/no.svg", image: "./assets/images/norway.jpg", desc: "Nordic liquid architecture emphasizes transparency and reflective surfaces to maximize the limited Arctic daylight. Projects often feature cantilevered glass over fjords, blurring the line between sea and structure." },
+      { name: "Brazil", flag: "./assets/flags/br.svg", image: "./assets/images/brazil.jpg", desc: "Tropical modernism utilizes sweeping curves and reinforced concrete to create 'flowing' buildings that mimic natural landforms. The use of glass here is about integrating the lush landscape directly into living spaces." },
+      { name: "France", flag: "./assets/flags/fr.svg", image: "./assets/images/france.jpg", desc: "From the glass pyramids of Paris to coastal eco-villas, French architecture uses translucent materials to redefine historical contexts with futuristic fluid shapes." },
+      { name: "Singapore", flag: "./assets/flags/sg.svg", image: "./assets/images/singapore.jpg", desc: "The pinnacle of biophilic design. Singapore integrates vertical gardens with glass skyscrapers, creating a literal 'liquid' ecosystem where architecture and nature are indistinguishable." },
+      { name: "Canada", flag: "./assets/flags/ca.svg", image: "./assets/images/canada.jpg", desc: "Canadian design often responds to the vast wilderness, using high-performance glass to withstand extremes while providing immersive views of the rugged landscape." },
+      { name: "Germany", flag: "./assets/flags/de.svg", image: "./assets/images/germany.jpg", desc: "German engineering brings precision to liquid forms, focusing on structural transparency and energy efficiency within iconic glass-domed government and commercial buildings." },
+      { name: "Australia", flag: "./assets/flags/au.svg", image: "./assets/images/australia.jpg", desc: "Coastal living redefined. Australian architecture uses vast expanses of glass and open plans to facilitate a fluid transition between the indoor and the Pacific horizon." },
+      { name: "Italy", flag: "./assets/flags/it.svg", image: "./assets/images/italy.jpg", desc: "A dialogue between the ancient and the modern. Italian glass liquid design often inserts radical transparent structures into historic piazzas, creating a striking visual contrast." },
+      { name: "South Africa", flag: "./assets/flags/za.svg", image: "./assets/images/south-africa.jpg", desc: "Exploring the textures of the earth through glass and light. South African modernism uses transparency to honor the dramatic topography of the Cape." },
+      { name: "United Arab Emirates", flag: "./assets/flags/ae.svg", image: "./assets/images/uae.jpg", desc: "In the desert heat, UAE architecture uses reflective liquid surfaces and cooling glass tech to create soaring vertical cities that shimmer like oases." },
+      { name: "Iceland", flag: "./assets/flags/is.svg", image: "./assets/images/iceland.jpg", desc: "Inspired by basalt columns and glacial ice, Icelandic design uses textured glass to mimic the refractive qualities of the surrounding frozen landscape." },
+      { name: "Mexico", flag: "./assets/flags/mx.svg", image: "./assets/images/mexico.jpg", desc: "Bold colors meet transparent planes. Mexican architects use liquid forms to play with shadows and light, creating vibrant spaces that breathe." },
+      { name: "Switzerland", flag: "./assets/flags/ch.svg", image: "./assets/images/switzerland.jpg", desc: "Precision at its finest. Swiss glass architecture is about purity of form and the seamless integration of structural elements with the Alpine backdrop." },
+      { name: "South Korea", flag: "./assets/flags/kr.svg", image: "./assets/images/south-korea.jpg", desc: "Techno-fluid design. In Seoul, architecture is a canvas for digital integration and liquid LED glass that transforms buildings into living organisms at night." }
+    ];
+  </script>
+<script data-purpose="functionality">
+    // Loading Screen Logic
+    window.addEventListener('load', () => {
+      const loader = document.getElementById('loading-screen');
+      const loadingBar = document.getElementById('loading-bar');
+      const loadingPercent = document.getElementById('loading-percent');
+      let progress = 0;
+
+      const progressTimer = setInterval(() => {
+        progress = Math.min(progress + Math.floor(Math.random() * 12) + 8, 100);
+        if (loadingBar) {
+          loadingBar.style.width = `${progress}%`;
+        }
+        if (loadingPercent) {
+          loadingPercent.textContent = `LOADING ${progress}%`;
+        }
+
+        if (progress >= 100) {
+          clearInterval(progressTimer);
+          setTimeout(() => {
+            loader.style.opacity = '0';
+            setTimeout(() => loader.classList.add('hidden'), 700);
+          }, 250);
+        }
+      }, 120);
+
+      renderRandomCards();
+    });
+
+    // Randomize Cards
+    function renderRandomCards() {
+      const grid = document.getElementById('dynamic-grid');
+      grid.innerHTML = '';
+      
+      const shuffled = [...countries].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, 3);
+
+      selected.forEach(country => {
+        const card = document.createElement('div');
+        card.className = 'glass-card rounded-2xl p-8 flex flex-col items-center text-center group cursor-pointer';
+        card.onclick = () => openArchModal(country);
+        
+        card.innerHTML = `
+          <div class="w-20 h-20 mb-6 relative">
+<img alt="${country.name}" class="w-full h-full object-cover rounded-full border-2 border-white/20 group-hover:scale-110 transition-transform duration-500" src="${country.flag}"/>
+<div class="absolute inset-0 rounded-full bg-blue-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<h3 class="text-2xl font-bold mb-4">${country.name}</h3>
+<p class="text-gray-400 text-sm mb-6 line-clamp-2">${country.desc}</p>
+<button class="text-xs font-bold uppercase tracking-widest text-blue-400 group-hover:text-blue-300 transition-colors">View Details</button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Modal Logic
+    function openArchModal(country) {
+      const modal = document.getElementById('arch-modal');
+      const content = document.getElementById('arch-content');
+      
+      content.innerHTML = `
+        <div class="mb-6 overflow-hidden rounded-2xl h-48 relative">
+<img class="w-full h-full object-cover" src="${country.image}"/>
+<div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+<div class="absolute bottom-4 left-4 flex items-center space-x-3">
+<img class="w-10 h-6 object-cover rounded shadow-lg" src="${country.flag}">
+<h2 class="text-3xl font-bold text-white">${country.name}</h2>
+</img></div>
+</div>
+<div class="prose prose-invert max-w-none">
+<p class="text-gray-300 leading-relaxed text-lg italic mb-4">"Architecture should speak of its time and place, but yearn for timelessness."</p>
+<p class="text-gray-400 leading-relaxed">${country.desc}</p>
+</div>
+<div class="mt-8 grid grid-cols-2 gap-4">
+<div class="bg-white/5 p-4 rounded-xl border border-white/10">
+<div class="text-xs text-blue-400 uppercase tracking-tighter mb-1">Concept</div>
+<div class="text-sm font-medium">Fluid Translucency</div>
+</div>
+<div class="bg-white/5 p-4 rounded-xl border border-white/10">
+<div class="text-xs text-blue-400 uppercase tracking-tighter mb-1">Primary Material</div>
+<div class="text-sm font-medium">Laminated Liquid Glass</div>
+</div>
+</div>
+      `;
+      
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeArchModal() {
+      document.getElementById('arch-modal').classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    }
+
+    function openGalleryModal(src) {
+      const modal = document.getElementById('gallery-modal');
+      const img = document.getElementById('gallery-large-img');
+      img.src = src;
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        img.classList.remove('scale-95', 'opacity-0');
+        img.classList.add('scale-100', 'opacity-100');
+      }, 50);
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeGalleryModal() {
+      const img = document.getElementById('gallery-large-img');
+      img.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        document.getElementById('gallery-modal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+      }, 300);
+    }
+  </script>
+<style data-purpose="custom-animations">
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+<script>
+    const glow = document.getElementById('cursor-glow');
+    window.addEventListener('mousemove', (e) => {
+        glow.style.left = e.clientX + 'px';
+        glow.style.top = e.clientY + 'px';
+    });
+</script>
+</body></html>
