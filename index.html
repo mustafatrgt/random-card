@@ -135,6 +135,60 @@
       backdrop-filter: blur(10px);
       background: rgba(0, 0, 0, 0.85);
     }
+
+    .card-enter {
+      opacity: 0;
+      transform: translateY(24px) scale(0.96);
+      filter: blur(8px);
+    }
+
+    .card-enter-active {
+      animation: cardEnter 620ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes cardEnter {
+      0% {
+        opacity: 0;
+        transform: translateY(24px) scale(0.96);
+        filter: blur(8px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    .arch-close-btn {
+      z-index: 30;
+      top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+      background: rgba(2, 6, 23, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .arch-modal-hero {
+      background: linear-gradient(120deg, rgba(37, 99, 235, 0.22), rgba(15, 23, 42, 0.65));
+    }
+
+    .arch-modal-image {
+      opacity: 0;
+      transform: scale(1.03);
+      transition: opacity 0.35s ease, transform 0.45s ease;
+    }
+
+    .arch-modal-image.is-loaded {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    @media (max-width: 640px) {
+      #arch-modal .glass-card {
+        padding: 1rem;
+      }
+    }
   </style>
 </head>
 <body class="font-sans antialiased"><div id="cursor-glow"></div>
@@ -198,9 +252,9 @@
 <!-- Architecture Detail Modal -->
 <div class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4" id="arch-modal">
 <div class="modal-backdrop absolute inset-0" onclick="closeArchModal()"></div>
-<div class="glass-card relative z-10 max-w-2xl w-full p-8 md:p-12 rounded-3xl animate-[fadeInUp_0.4s_ease-out]">
-<button class="absolute top-6 right-6 text-white/50 hover:text-white" onclick="closeArchModal()">
-<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<div class="glass-card relative z-10 max-w-2xl w-full p-4 sm:p-8 md:p-12 rounded-3xl animate-[fadeInUp_0.4s_ease-out]">
+<button aria-label="Close details modal" class="arch-close-btn absolute p-2.5 rounded-full text-white/80 hover:text-white transition-colors" onclick="closeArchModal()">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
 </button>
 <div id="arch-content">
 <!-- Content injected by JS -->
@@ -238,6 +292,27 @@
     ];
   </script>
 <script data-purpose="functionality">
+    const preloadedImages = new Set();
+
+    function preloadImage(source) {
+      if (!source || preloadedImages.has(source)) {
+        return;
+      }
+
+      const image = new Image();
+      image.decoding = 'async';
+      image.fetchPriority = 'high';
+      image.src = source;
+      preloadedImages.add(source);
+    }
+
+    function preloadCountryMedia() {
+      countries.forEach(country => {
+        preloadImage(country.image);
+        preloadImage(country.flag);
+      });
+    }
+
     // Loading Screen Logic
     window.addEventListener('load', () => {
       const loader = document.getElementById('loading-screen');
@@ -264,6 +339,11 @@
       }, 120);
 
       renderRandomCards();
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => preloadCountryMedia(), { timeout: 1200 });
+      } else {
+        setTimeout(() => preloadCountryMedia(), 500);
+      }
     });
 
     // Randomize Cards
@@ -275,8 +355,13 @@
       const selected = shuffled.slice(0, 3);
 
       selected.forEach(country => {
+        preloadImage(country.image);
+      });
+
+      selected.forEach((country, index) => {
         const card = document.createElement('div');
-        card.className = 'glass-card rounded-2xl p-8 flex flex-col items-center text-center group cursor-pointer';
+        card.className = 'glass-card rounded-2xl p-8 flex flex-col items-center text-center group cursor-pointer card-enter';
+        card.style.animationDelay = `${index * 120}ms`;
         card.onclick = () => openArchModal(country);
         
         card.innerHTML = `
@@ -289,6 +374,9 @@
 <button class="text-xs font-bold uppercase tracking-widest text-blue-400 group-hover:text-blue-300 transition-colors">View Details</button>
         `;
         grid.appendChild(card);
+        requestAnimationFrame(() => {
+          card.classList.add('card-enter-active');
+        });
       });
     }
 
@@ -296,15 +384,16 @@
     function openArchModal(country) {
       const modal = document.getElementById('arch-modal');
       const content = document.getElementById('arch-content');
+      preloadImage(country.image);
       
       content.innerHTML = `
-        <div class="mb-6 overflow-hidden rounded-2xl h-48 relative">
-<img class="w-full h-full object-cover" src="${country.image}"/>
+        <div class="mb-6 mt-10 sm:mt-0 overflow-hidden rounded-2xl h-44 sm:h-48 relative arch-modal-hero">
+<img alt="${country.name}" class="w-full h-full object-cover arch-modal-image" decoding="async" fetchpriority="high" src="${country.image}"/>
 <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
 <div class="absolute bottom-4 left-4 flex items-center space-x-3">
-<img class="w-10 h-6 object-cover rounded shadow-lg" src="${country.flag}">
+<img alt="${country.name} flag" class="w-10 h-6 object-cover rounded shadow-lg" decoding="async" loading="eager" src="${country.flag}"/>
 <h2 class="text-3xl font-bold text-white">${country.name}</h2>
-</img></div>
+</div>
 </div>
 <div class="prose prose-invert max-w-none">
 <p class="text-gray-300 leading-relaxed text-lg italic mb-4">"Architecture should speak of its time and place, but yearn for timelessness."</p>
@@ -321,6 +410,16 @@
 </div>
 </div>
       `;
+
+      const heroImage = content.querySelector('.arch-modal-image');
+      if (heroImage) {
+        const showImage = () => heroImage.classList.add('is-loaded');
+        if (heroImage.complete) {
+          showImage();
+        } else {
+          heroImage.addEventListener('load', showImage, { once: true });
+        }
+      }
       
       modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
