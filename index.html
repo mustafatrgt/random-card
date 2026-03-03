@@ -56,8 +56,9 @@
     .orb {
       position: absolute;
       border-radius: 50%;
-      filter: blur(100px);
-      opacity: 0.3;
+      filter: blur(115px);
+      opacity: 0.42;
+      mix-blend-mode: screen;
       animation: drift 20s linear infinite alternate;
     }
 
@@ -67,20 +68,22 @@
     }
 
     .glass-card {
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(28px) saturate(130%);
+      -webkit-backdrop-filter: blur(28px) saturate(130%);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(99, 102, 241, 0.03));
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 14px 42px rgba(0, 0, 0, 0.45), inset 0 0 20px rgba(255, 255, 255, 0.06);
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
+      isolation: isolate;
+      z-index: 2;
     }
 
     .glass-card:hover {
-      background: rgba(255, 255, 255, 0.05);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(99, 102, 241, 0.06));
       transform: translateY(-8px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(139, 92, 246, 0.2), inset 0 0 15px rgba(255, 255, 255, 0.1);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.58), 0 0 38px rgba(168, 85, 247, 0.25), inset 0 0 20px rgba(255, 255, 255, 0.13);
     }
 
     .glass-card::before {
@@ -103,7 +106,7 @@
       content: '';
       position: absolute;
       inset: 2px;
-      background: #080c1d;
+      background: linear-gradient(160deg, rgba(8, 12, 29, 0.52), rgba(10, 15, 34, 0.66));
       border-radius: inherit;
       z-index: 0;
       pointer-events: none;
@@ -123,10 +126,10 @@
       position: fixed;
       width: 400px;
       height: 400px;
-      background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.18) 0%, rgba(124, 58, 237, 0.12) 38%, transparent 72%);
       border-radius: 50%;
       pointer-events: none;
-      z-index: 5;
+      z-index: 1;
       transform: translate(-50%, -50%);
       transition: width 0.3s, height 0.3s;
     }
@@ -144,6 +147,22 @@
 
     .card-enter-active {
       animation: cardEnter 620ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    #animated-title {
+      background: linear-gradient(90deg, #dbeafe, #a78bfa, #22d3ee, #c4b5fd, #dbeafe);
+      background-size: 280% 280%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: titleFlow 8s ease-in-out infinite;
+      text-shadow: 0 0 22px rgba(167, 139, 250, 0.25);
+    }
+
+    @keyframes titleFlow {
+      0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+      50% { background-position: 100% 50%; filter: hue-rotate(18deg); }
+      100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
     }
 
     @keyframes cardEnter {
@@ -209,10 +228,11 @@
 <!-- END: Loading Screen -->
 <!-- BEGIN: Liquid Background -->
 <div class="liquid-bg" data-purpose="background-animations">
-<div class="orb w-[600px] h-[600px] bg-purple-900 top-[-20%] left-[-10%]" style="animation-duration: 25s;"></div>
-<div class="orb w-[700px] h-[700px] bg-blue-900 bottom-[-30%] right-[-10%]" style="animation-duration: 30s; animation-delay: -5s;"></div>
-<div class="orb w-[400px] h-[400px] bg-indigo-900 top-[30%] right-[10%]" style="animation-duration: 22s; animation-delay: -2s;"></div>
-<div class="orb w-[500px] h-[500px] bg-slate-900 bottom-[10%] left-[20%]" style="animation-duration: 35s;"></div>
+<div class="orb w-[640px] h-[640px] top-[-22%] left-[-14%]" style="background: radial-gradient(circle, rgba(192,132,252,0.95), rgba(139,92,246,0.35) 42%, transparent 72%); animation-duration: 25s;"></div>
+<div class="orb w-[760px] h-[760px] bottom-[-36%] right-[-12%]" style="background: radial-gradient(circle, rgba(167,139,250,0.9), rgba(124,58,237,0.28) 40%, transparent 72%); animation-duration: 30s; animation-delay: -5s;"></div>
+<div class="orb w-[440px] h-[440px] top-[26%] right-[8%]" style="background: radial-gradient(circle, rgba(232,121,249,0.92), rgba(168,85,247,0.3) 44%, transparent 72%); animation-duration: 22s; animation-delay: -2s;"></div>
+<div class="orb w-[520px] h-[520px] bottom-[8%] left-[18%]" style="background: radial-gradient(circle, rgba(216,180,254,0.78), rgba(109,40,217,0.24) 44%, transparent 72%); animation-duration: 35s;"></div>
+<div class="orb w-[380px] h-[380px] top-[52%] left-[48%]" style="background: radial-gradient(circle, rgba(233,213,255,0.72), rgba(139,92,246,0.26) 44%, transparent 70%); animation-duration: 27s; animation-delay: -7s;"></div>
 </div>
 <!-- END: Liquid Background -->
 <!-- BEGIN: Navigation -->
@@ -226,7 +246,7 @@
 <!-- BEGIN: Dynamic Cards Section -->
 <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto pt-40" data-purpose="dynamic-card-container" id="explore">
 <div class="mb-16 text-center">
-<h2 class="text-3xl font-bold mb-4">Regional Landmarks</h2>
+<h2 class="text-3xl font-bold mb-4" id="animated-title">Regional Landmarks</h2>
 <div class="w-20 h-1 bg-blue-600 mx-auto rounded-full"></div>
 </div>
 <!-- Container for randomized cards -->
@@ -361,7 +381,6 @@
       selected.forEach((country, index) => {
         const card = document.createElement('div');
         card.className = 'glass-card rounded-2xl p-8 flex flex-col items-center text-center group cursor-pointer card-enter';
-        card.style.animationDelay = `${index * 120}ms`;
         card.onclick = () => openArchModal(country);
         
         card.innerHTML = `
@@ -374,9 +393,9 @@
 <button class="text-xs font-bold uppercase tracking-widest text-blue-400 group-hover:text-blue-300 transition-colors">View Details</button>
         `;
         grid.appendChild(card);
-        requestAnimationFrame(() => {
+        setTimeout(() => {
           card.classList.add('card-enter-active');
-        });
+        }, 120 + (index * 240));
       });
     }
 
